@@ -7,12 +7,13 @@ export async function postRent(req,res){
     const result=await db.query(`
         SELECT *
         FROM games 
-        WHERE id=$1
-    `[gameId])
-    const originalPrice=daysRented*result.rows[0].pricePerDay
+        WHERE id=$1;
+    `,[gameId])
+    const originalPrice=result.rows[0].pricePerDay* parseInt(daysRented)
+    console.log(originalPrice)
     await db.query(`
         INSERT INTO rentals 
-        (customerId,gameId,daysRented,rentDate,originalPrice) 
+        ("customerId","gameId","daysRented","rentDate","originalPrice") 
         VALUES 
         ($1,$2,$3,$4,$5);
     `,[customerId,gameId,daysRented,rentDate,originalPrice])
@@ -47,19 +48,24 @@ export async function getRent(req,res){
 }
 export async function endRent(req,res){
     const {id}=req.params
+    
     const result= await db.query(`
         SELECT * FROM rentals 
         WHERE id=$1
+        ;
     `,[id])
+    
     const {rentDate,daysRented,originalPrice}=result.rows[0]
     const returnDate=dayjs().format('YYYY-MM-DD')
-    const delay=parseInt(returnDate[8]+returnDate[9])-parseInt(rentDate[8]+rentDate[9])-daysRented
-    let delayFee=0
-    if(delay>0){delayFee=delay*originalPrice/daysRented}
+    
+    const delay=parseInt(returnDate[8]+returnDate[9])-parseInt(rentDate[8]+rentDate[9])-parseInt(daysRented)
+    let delayFee='0'
+    if(delay>0){delayFee=Integer.toString(delay*parseInt(originalPrice)/parseInt(daysRented))}
+    
     await db.query(`
         UPDATE rentals 
         SET
-            returnDate=$1
+            returnDate=$1 ,
             delayFee=$2
         WHERE 
             id=$3
