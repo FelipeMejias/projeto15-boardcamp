@@ -1,6 +1,15 @@
 import db from '../db.js'
 export async function postCategory(req,res){
     const {name}=req.body
+    if(name==''){return res.sendStatus(400)}
+
+    const result= await db.query(`
+        SELECT * FROM categories 
+    `)
+    for(let category of result.rows){
+        if(category.name==name){return res.sendStatus(409)}
+    }
+
     await db.query(`
         INSERT INTO categories 
         (name) 

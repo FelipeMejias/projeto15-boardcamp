@@ -15,7 +15,8 @@ export async function getGame(req,res){
         SELECT categories.name as "categoryName" ,
         * FROM games 
         JOIN categories
-        ON games."categoryId"=categories.id;
+        ON games."categoryId"=categories.id
+        ;
     `)
     
     res.send(result.rows)
